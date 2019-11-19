@@ -342,6 +342,9 @@ function eventGameInit()
 			setPower(0, playnum);
 			var droids = enumDroid(playnum, DROID_ANY);
 			droids.forEach(function(e){removeObject(e);});
+			var structs = enumStruct(playnum);
+			structs.forEach(function(e){removeObject(e);});
+			setTimer("addVisible",10000);
 			continue;
 		}
 
@@ -416,6 +419,15 @@ function eventGameInit()
 	if (tilesetType === "URBAN" || tilesetType === "ROCKIES")
 	{
 		setTimer("weatherCycle", 45000);
+	}
+}
+
+function addVisible()
+{
+	if (specs[selectedPlayer])
+	{
+		addSpotter(1, 1, selectedPlayer, 32640, 0, gameTime + 10000);
+		return;
 	}
 }
 
