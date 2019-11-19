@@ -96,6 +96,8 @@ function reticuleDesignCheck()
 	if (specs[selectedPlayer] === true)
 	{
 		setMiniMap(true);
+		setReticuleButton(4, _("Design - construct HQ first"), "", "");
+		setDesign(false);
 		return;
 	}
 
