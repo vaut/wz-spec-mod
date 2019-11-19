@@ -15,6 +15,7 @@ var lastHitTime = 0;
 var cheatmode = false;
 var maxOilDrums = 0;
 var mainReticule = false;
+var specs = {};
 
 const CREATE_LIKE_EVENT = 0;
 const DESTROY_LIKE_EVENT = 1;
@@ -91,6 +92,12 @@ function reticuleDesignCheck()
 {
 	var structureComplete = false;
 	var HQS = [HQ,];
+
+	if (specs[selectedPlayer])
+	{
+		setMiniMap(true);
+		return;
+	}
 
 	for (var i = 0, len = HQS.length; i < len; ++i)
 	{
@@ -209,6 +216,15 @@ function eventGameLoaded()
 function eventGameInit()
 {
 	setupGame();
+	
+	//check spec users
+	//
+	for (var playnum = 0; playnum < maxPlayers; playnum++)
+	{ 
+		if(enumStruct(playnum,"A0Sat-linkCentre").length != 0){
+			specs[playnum] = true;
+		}
+	}
 
 	// always at least one oil drum, and one more for every 64x64 tiles of map area
 	maxOilDrums = (mapWidth * mapHeight) >> 12; // replace float division with shift for sync-safety
@@ -318,6 +334,17 @@ function eventGameInit()
 
 	for (var playnum = 0; playnum < maxPlayers; playnum++)
 	{
+		//BCrusher
+		//Не будет работать на картах, где у игрока, а не спекататора предустановлено спутниковое видиние.
+		//На остальных "стандартных" картах у игроков будет засчитываться победа/поражение не смотря на наличие спектаторов.
+		if(specs[playnum] === true)
+		{
+			setPower(0, playnum);
+			var droids = enumDroid(playnum, DROID_ANY);
+			droids.forEach(function(e){removeObject(e);});
+			continue;
+		}
+
 		enableResearch("R-Sys-Sensor-Turret01", playnum);
 		enableResearch("R-Wpn-MG1Mk1", playnum);
 		enableResearch("R-Sys-Engineering01", playnum);
@@ -345,7 +372,7 @@ function eventGameInit()
 				}
 			}
 		}
-		else if (baseType == CAMP_BASE)
+		if (baseType == CAMP_BASE)
 		{
 			setPower(2500, playnum);
 			for (var count = 0; count < numBaseTech; count++)
@@ -400,7 +427,7 @@ function checkEndConditions()
 	var droids = countDroid(DROID_ANY);
 
 	// Losing Conditions
-	if (droids == 0 && factories == 0)
+	if (droids == 0 && factories == 0 && !specs[selectedPlayer] )
 	{
 		var gameLost = true;
 
@@ -434,18 +461,47 @@ function checkEndConditions()
 	var gamewon = true;
 
 	// check if all enemies defeated
-	for (var playnum = 0; playnum < maxPlayers; playnum++)
-	{
-		if (playnum != selectedPlayer && !allianceExistsBetween(selectedPlayer, playnum))	// checking enemy player
-		{
-			factories = countStruct("A0LightFactory", playnum) + countStruct("A0CyborgFactory", playnum); // nope
-			droids = countDroid(DROID_ANY, playnum);
-			if (droids > 0 || factories > 0)
+	if (!specs[selectedPlayer])
+	{	
+		for (var playnum = 0; playnum < maxPlayers; playnum++)
+		{	
+			if (playnum != selectedPlayer && !allianceExistsBetween(selectedPlayer, playnum) && !specs[playnum])	// checking enemy player
 			{
-				gamewon = false;	//one of the enemies still alive
-				break;
+				factories = countStruct("A0LightFactory", playnum) + countStruct("A0CyborgFactory", playnum); // nope
+				droids = countDroid(DROID_ANY, playnum);
+				if (droids > 0 || factories > 0)
+				{
+					gamewon = false;	//one of the enemies still alive
+					break;
+				}
 			}
 		}
+	}
+
+	if (specs[selectedPlayer])
+	{
+		for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
+		{
+			// check if all enemies defeated
+			gamewon = true;
+			for (var playnum = 0; playnum < maxPlayers; playnum++)
+			{
+				if (playnum != splaynum && !allianceExistsBetween(splaynum, playnum) && !specs[playnum])	// checking enemy player
+				{
+					factories = countStruct("A0LightFactory", playnum) + countStruct("A0CyborgFactory", playnum); // nope
+					droids = countDroid(DROID_ANY, playnum);
+					if (droids > 0 || factories > 0)
+					{
+						gamewon = false;	//one of the enemies still alive
+						break;
+					}
+				}
+			}
+			if (gamewon) 
+			{
+				break;
+			}
+		}			
 	}
 
 	if (gamewon)
