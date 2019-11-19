@@ -93,7 +93,7 @@ function reticuleDesignCheck()
 	var structureComplete = false;
 	var HQS = [HQ,];
 
-	if (specs[selectedPlayer])
+	if (specs[selectedPlayer] === true)
 	{
 		setMiniMap(true);
 		return;
@@ -111,7 +111,7 @@ function reticuleDesignCheck()
 			}
 		}
 	}
-	if (structureComplete === true)
+	if (structureComplete === true && !specs[selectedPlayer])
 	{
 		setReticuleButton(4, _("Design (F4)"), "image_design_up.png", "image_design_down.png");
 		setMiniMap(true);
@@ -220,9 +220,23 @@ function eventGameInit()
 	//check spec users
 	//
 	for (var playnum = 0; playnum < maxPlayers; playnum++)
-	{ 
-		if(enumStruct(playnum,"A0Sat-linkCentre").length != 0){
+	{		
+		if(enumStruct(playnum,SAT_UPLINK).length != 0)
+		{
 			specs[playnum] = true;
+			var structs = [FACTORY, CYBORG_FACTORY, VTOL_FACTORY, RESEARCH_LAB, RESOURCE_EXTRACTOR];
+			for (var i = 0; i < structs.length; ++i)
+			{
+				var onMapStructss = enumStruct(playnum, structs[i]);
+				for (var j = 0; j < onMapStructss.length; ++j)
+				{
+					if (onMapStructss[j].status === BUILT)
+					{
+						specs[playnum] = false;
+						break;
+					}
+				}
+			}
 		}
 	}
 
@@ -334,7 +348,6 @@ function eventGameInit()
 
 	for (var playnum = 0; playnum < maxPlayers; playnum++)
 	{
-		//BCrusher
 		//Не будет работать на картах, где у игрока, а не спекататора предустановлено спутниковое видиние.
 		//На остальных "стандартных" картах у игроков будет засчитываться победа/поражение не смотря на наличие спектаторов.
 		if(specs[playnum] === true)
@@ -424,7 +437,7 @@ function eventGameInit()
 
 function addVisible()
 {
-	if (specs[selectedPlayer])
+	if (specs[selectedPlayer] === true)
 	{
 		addSpotter(1, 1, selectedPlayer, 32640, 0, gameTime + 10000);
 		return;
@@ -490,7 +503,7 @@ function checkEndConditions()
 		}
 	}
 
-	if (specs[selectedPlayer])
+	if (specs[selectedPlayer] === true)
 	{
 		for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
 		{
