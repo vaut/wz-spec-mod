@@ -560,7 +560,7 @@ function checkEndConditions()
 	{
 		for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
 		{
-			// check if all enemies defeated
+			// check one enemies defeated
 			gamewon = true;
 			for (var playnum = 0; playnum < maxPlayers; playnum++)
 			{
@@ -582,6 +582,37 @@ function checkEndConditions()
 
 	if (gamewon)
 	{
+	debug([mapName, baseType, powerType, scavengers].join());
+	chat(ALL_PLAYERS, [mapName, baseType, powerType, scavengers].join());
+		//find win and lose players
+		var statusWon = "spec"
+		for (var playnum = 0; playnum < maxPlayers; playnum++)
+		{
+			if (specs[playnum])
+			{
+				continue;
+			}
+			if (losingConditions(playnum))
+			{
+				statusWon = "lose" ;
+				for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
+				{
+					if (playnum != splaynum && allianceExistsBetween(splaynum, playnum) && !specs[playnum])
+					{
+						if (!losingConditions(splaynum))					{
+							sgamewon = "won";	//one of the enemies still alive
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				statusWon = "won"
+			}
+			chat(ALL_PLAYERS, [statusWon+" " + playerData[playnum].name, "colour "+ playerData[playnum].colour, "position "+ playerData[playnum].position].join("; "))
+			debug([statusWon+" " + playerData[playnum].name, "colour "+ playerData[playnum].colour, "position "+ playerData[playnum].position].join("; ") );
+		}
 		gameOverMessage(true);
 		removeTimer("checkEndConditions");
 	}
