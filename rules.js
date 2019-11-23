@@ -486,15 +486,30 @@ function eventGameInit()
 }
 
 
+
+
+
 // /////////////////////////////////////////////////////////////////
 // END CONDITIONS
+
+
+function losingConditions(playnum)
+{	
+	var factories = countStruct("A0LightFactory", playnum ) + countStruct("A0CyborgFactory", playnum);
+	var droids = countDroid(DROID_ANY, playnum);
+	// Losing Conditions
+	if (droids == 0 && factories == 0)
+	{
+		return true;
+	}
+	return false;
+}
+
 function checkEndConditions()
 {
-	var factories = countStruct("A0LightFactory") + countStruct("A0CyborgFactory");
-	var droids = countDroid(DROID_ANY);
 
 	// Losing Conditions
-	if (droids == 0 && factories == 0 && !specs[selectedPlayer] )
+	if (losingConditions(selectedPlayer) && !specs[selectedPlayer] ) 
 	{
 		var gameLost = true;
 
@@ -505,9 +520,7 @@ function checkEndConditions()
 			{
 				if (playnum != selectedPlayer && allianceExistsBetween(selectedPlayer, playnum))
 				{
-					factories = countStruct("A0LightFactory", playnum) + countStruct("A0CyborgFactory", playnum);
-					droids = countDroid(DROID_ANY, playnum);
-					if (droids > 0 || factories > 0)
+					if (!losingConditions(playnum))
 					{
 						gameLost = false;	// someone from our team still alive
 						break;
@@ -534,9 +547,7 @@ function checkEndConditions()
 		{	
 			if (playnum != selectedPlayer && !allianceExistsBetween(selectedPlayer, playnum) && !specs[playnum])	// checking enemy player
 			{
-				factories = countStruct("A0LightFactory", playnum) + countStruct("A0CyborgFactory", playnum); // nope
-				droids = countDroid(DROID_ANY, playnum);
-				if (droids > 0 || factories > 0)
+				if (!losingConditions(playnum))
 				{
 					gamewon = false;	//one of the enemies still alive
 					break;
@@ -555,9 +566,7 @@ function checkEndConditions()
 			{
 				if (playnum != splaynum && !allianceExistsBetween(splaynum, playnum) && !specs[playnum])	// checking enemy player
 				{
-					factories = countStruct("A0LightFactory", playnum) + countStruct("A0CyborgFactory", playnum); // nope
-					droids = countDroid(DROID_ANY, playnum);
-					if (droids > 0 || factories > 0)
+					if (!losingConditions(playnum))
 					{
 						gamewon = false;	//one of the enemies still alive
 						break;
