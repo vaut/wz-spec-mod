@@ -93,13 +93,6 @@ function reticuleDesignCheck()
 	var structureComplete = false;
 	var HQS = [HQ,];
 
-	if (specs[selectedPlayer] === true)
-	{
-		setMiniMap(true);
-		setReticuleButton(4, _("Design - construct HQ first"), "", "");
-		setDesign(false);
-		return;
-	}
 
 	for (var i = 0, len = HQS.length; i < len; ++i)
 	{
@@ -113,7 +106,7 @@ function reticuleDesignCheck()
 			}
 		}
 	}
-	if (structureComplete === true && !specs[selectedPlayer])
+	if (structureComplete === true )
 	{
 		setReticuleButton(4, _("Design (F4)"), "image_design_up.png", "image_design_down.png");
 		setMiniMap(true);
@@ -227,10 +220,20 @@ function setupGame()
 	{
 		setSky("texpages/page-25-sky-urban.png", 0.5, 10000.0);
 	}
+
+	if (specs[selectedPlayer] === true)
+	{
+		setMiniMap(true);
+		setReticuleButton(4, "", "", "");
+		setReticuleButton(5, "", "image_intelmap_up.png", "image_intelmap_down.png");
+		setDesign(false);
+		showInterface();
+		hackPlayIngameAudio();
+		return;
+	}
 	// Disabled by default
 	setMiniMap(false);
 	setDesign(false);
-
 	setMainReticule();
 	showInterface();
 	mainReticule = true;
