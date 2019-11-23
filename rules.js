@@ -181,8 +181,35 @@ function reticuleUpdate(obj, eventType)
 	}
 }
 
+function checkSpecs()
+{
+	//check spec users
+	//
+	for (var playnum = 0; playnum < maxPlayers; playnum++)
+	{		
+		if(enumStruct(playnum,SAT_UPLINK).length != 0)
+		{
+			specs[playnum] = true;
+			var structs = [FACTORY, CYBORG_FACTORY, VTOL_FACTORY, RESEARCH_LAB, RESOURCE_EXTRACTOR];
+			for (var i = 0; i < structs.length; ++i)
+			{
+				var onMapStructss = enumStruct(playnum, structs[i]);
+				for (var j = 0; j < onMapStructss.length; ++j)
+				{
+					if (onMapStructss[j].status === BUILT)
+					{
+						specs[playnum] = false;
+						break;
+					}
+				}
+			}
+		}
+	}
+}
 function setupGame()
 {
+	
+	checkSpecs();
 	if (tilesetType == "URBAN")
 	{
 		replaceTexture("page-8-player-buildings-bases.png", "page-8-player-buildings-bases-urban.png");
@@ -208,6 +235,7 @@ function setupGame()
 	showInterface();
 	mainReticule = true;
 	hackPlayIngameAudio();
+
 }
 
 function eventGameLoaded()
@@ -219,29 +247,6 @@ function eventGameInit()
 {
 	setupGame();
 	
-	//check spec users
-	//
-	for (var playnum = 0; playnum < maxPlayers; playnum++)
-	{		
-		if(enumStruct(playnum,SAT_UPLINK).length != 0)
-		{
-			specs[playnum] = true;
-			var structs = [FACTORY, CYBORG_FACTORY, VTOL_FACTORY, RESEARCH_LAB, RESOURCE_EXTRACTOR];
-			for (var i = 0; i < structs.length; ++i)
-			{
-				var onMapStructss = enumStruct(playnum, structs[i]);
-				for (var j = 0; j < onMapStructss.length; ++j)
-				{
-					if (onMapStructss[j].status === BUILT)
-					{
-						specs[playnum] = false;
-						break;
-					}
-				}
-			}
-		}
-	}
-
 	// always at least one oil drum, and one more for every 64x64 tiles of map area
 	maxOilDrums = (mapWidth * mapHeight) >> 12; // replace float division with shift for sync-safety
 	for (var i = 0; i < maxOilDrums; ++i)
@@ -390,7 +395,7 @@ function eventGameInit()
 				}
 			}
 		}
-		if (baseType == CAMP_BASE)
+		else if (baseType == CAMP_BASE)
 		{
 			setPower(2500, playnum);
 			for (var count = 0; count < numBaseTech; count++)
