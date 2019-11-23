@@ -389,7 +389,7 @@ function eventGameInit()
 			droids.forEach(function(e){removeObject(e);});
 			var structs = enumStruct(playnum);
 			structs.forEach(function(e){removeObject(e);});
-			setTimer("addVisible",10000);
+			addSpotter(1, 1, playnum, 32640, 0, 100000000);
 			continue;
 		}
 
@@ -467,14 +467,6 @@ function eventGameInit()
 	}
 }
 
-function addVisible()
-{
-	if (specs[selectedPlayer] === true)
-	{
-		addSpotter(1, 1, selectedPlayer, 32640, 0, gameTime + 10000);
-		return;
-	}
-}
 
 // /////////////////////////////////////////////////////////////////
 // END CONDITIONS
