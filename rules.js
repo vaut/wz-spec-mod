@@ -179,24 +179,46 @@ function checkSpecs()
 	//check spec users
 	//
 	for (var playnum = 0; playnum < maxPlayers; playnum++)
-	{		
+	{
+		var specFeature	={}
 		if(enumStruct(playnum,SAT_UPLINK).length != 0)
 		{
-			specs[playnum] = true;
-			var structs = [FACTORY, CYBORG_FACTORY, VTOL_FACTORY, RESEARCH_LAB, RESOURCE_EXTRACTOR];
-			for (var i = 0; i < structs.length; ++i)
+			specFeature["uplink"] = true;
+		}
+
+		var structs = [FACTORY, CYBORG_FACTORY, VTOL_FACTORY, RESEARCH_LAB, RESOURCE_EXTRACTOR];
+		specFeature["factory"] = true;
+		for (var i = 0; i < structs.length; ++i)
+		{
+			var onMapStructss = enumStruct(playnum, structs[i]);
+			for (var j = 0; j < onMapStructss.length; ++j)
 			{
-				var onMapStructss = enumStruct(playnum, structs[i]);
-				for (var j = 0; j < onMapStructss.length; ++j)
+				if (onMapStructss[j].status === BUILT)
 				{
-					if (onMapStructss[j].status === BUILT)
-					{
-						specs[playnum] = false;
-						break;
-					}
+					specFeature["factory"] = false;
+					break;
 				}
 			}
 		}
+
+		if (enumDroid(playnum, DROID_CONSTRUCT).length > 0)
+		{
+			specFeature["track"] = false;
+		}
+		else
+		{
+		specFeature["track"] = true;
+		}
+		for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
+			{
+				if (playnum != splaynum && allianceExistsBetween(splaynum, playnum) && (enumDroid(splaynum, DROID_CONSTRUCT).length > 0)  )	// checking enemy player
+				{
+					specFeature["track"] = false;
+				}
+			}
+
+		if (specFeature["track"]) {specs[playnum] = true;}
+		if (specFeature["uplink"] && specFeature["factory"] ){specs[playnum] = true;}
 	}
 }
 function setupGame()
