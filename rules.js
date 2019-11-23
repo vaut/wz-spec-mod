@@ -217,8 +217,26 @@ function checkSpecs()
 				}
 			}
 
-		if (specFeature["track"]) {specs[playnum] = true;}
-		if (specFeature["uplink"] && specFeature["factory"] ){specs[playnum] = true;}
+		specFeature["oil"] = true;
+		if(enumStruct(playnum,RESOURCE_EXTRACTOR).length != 0) 
+		{
+			specFeature["oil"] = true;
+		}
+		specFeature["oilReach"]=true;
+		var oils = enumFeature(ALL_PLAYERS).filter(function(e){if(e.stattype==OIL_RESOURCE)return true;return false;})
+		var trucks = enumDroid(playnum, DROID_CONSTRUCT);
+		trucks.forEach(function(truck)
+			{
+				oils.forEach(function (oil)
+				{
+					if (droidCanReach(truck, oil.x, oil.y))
+					{
+						specFeature["oilReach"] = false;
+					}
+				})
+			});
+		if (specFeature["track"] && !specFeature["factory"] ) {specs[playnum] = true;}
+		if (specFeature["uplink"] && specFeature["factory"] && specFeature["oil"] && specFeature["oilReach"]) {specs[playnum] = true;}
 	}
 }
 function setupGame()
