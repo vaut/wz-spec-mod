@@ -21,41 +21,44 @@ var specs = {};
 //add human readble method
 var human = {
 	scavengers : function () {
-		if ( scavengers= false) {return "scavengers off";}
-		if ( scavengers = true) {return "scavengers on";}
+		if ( scavengers= false) {return _("Scavengers");}
+		if ( scavengers = true) {return _("No Scavengers");}
 		},
 
 	alliancesType : function () {
 		switch (alliancesType) {
-			case 0: return "Ally: No Alliances"; break;
-			case 1: return "Ally: Allow Alliances"; break;
-			case 2: return "Ally: Locked. Shared"; break;
-			case 3: return "Ally: Locked. No shared"; break;
+			case 0: return _("No Alliances"); break;
+			case 1: return _("Allow Alliances"); break;
+			case 2: return _("Locked Teams"); break;
+			case 3: return _("Locked Teams, No Shared Research"); break;
 	
 			}
 		},
 
 	powerType : function () {
 		switch (powerType) {
-			case 0: return "Power: Min"; break;
-			case 1: return "Power: Mid"; break;
-			case 2: return "Power: Max"; break;
+			case 0: return _("Low Power Levels"); break;
+			case 1: return _("Medium Power Levels"); break;
+			case 2: return _("High Power Levels"); break;
 			}
 		},
  
 	baseType : function () {
 		switch (baseType) {
-			case 0: return "Base: Min"; break;
-			case 1: return "Base: Mid"; break;
-			case 2: return "Base: Max"; break;
+			case 0: return _("Start with No Bases"); break;
+			case 1: return _("Start with Bases"); break;
+			case 2: return _("Start with Advanced Bases"); break;
 			}
-		}
-	}
- 
-//playerData[playnum].name
-//playerData[playnum].colour
+		},
+	colors :  [_("Green"),_("Orange"),_("Grey"),_("Black"),_("Red"),_("Blue"),_("Pink"),_("Cyan"),_("Yellow"),_("Purple"),_("White"),_("Bright blue"),_("Neon green"),_("Infrared"),_("Ultraviolet"),_("Brown")],
+	teams : ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+	};
 
-
+function writeGameSettings()
+{
+//	debug( [mapName, human.scavengers(), human.alliancesType(), human.powerType(), human.baseType(), version].join("\n");
+	console([mapName, human.scavengers(), human.alliancesType(), human.powerType(), human.baseType()].join("\n"));
+}
 
 const CREATE_LIKE_EVENT = 0;
 const DESTROY_LIKE_EVENT = 1;
@@ -329,9 +332,8 @@ function eventGameLoaded()
 function eventGameInit()
 {
 	setupGame();
-	debug([mapName, scavengers, alliancesType, powerType, baseType, version].join());
-
-	debug([mapName, human.scavengers(), human.alliancesType(), human.powerType(), human.baseType(), version].join());
+	writeGameSettings()
+	
 	
 	// always at least one oil drum, and one more for every 64x64 tiles of map area
 	maxOilDrums = (mapWidth * mapHeight) >> 12; // replace float division with shift for sync-safety
@@ -441,8 +443,8 @@ function eventGameInit()
 
 	for (var playnum = 0; playnum < maxPlayers; playnum++)
 	{
-		//Не будет работать на картах, где у игрока, а не спекататора предустановлено спутниковое видиние.
-		//На остальных "стандартных" картах у игроков будет засчитываться победа/поражение не смотря на наличие спектаторов.
+		//Уничтожаем все строения наблюдателю, и открываем ему карту.
+		//Технологии не выдаем.
 		if(specs[playnum] === true)
 		{
 			setPower(0, playnum);
@@ -625,8 +627,6 @@ function checkEndConditions()
 
 	if (gamewon)
 	{
-	debug([mapName, scavengers.human, alliancesType.human, powerType.human, baseType.human, version].join());
-//	chat(ALL_PLAYERS, [mapName, baseType, powerType, scavengers].join());
 		//find win and lose players
 		var statusWon = "spec"
 		for (var playnum = 0; playnum < maxPlayers; playnum++)
@@ -637,7 +637,7 @@ function checkEndConditions()
 			}
 			if (losingConditions(playnum))
 			{
-				statusWon = "lose" ;
+				statusWon = "defeated" ;
 				for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
 				{
 					if (playnum != splaynum && allianceExistsBetween(splaynum, playnum) && !specs[playnum])
@@ -653,8 +653,8 @@ function checkEndConditions()
 			{
 				statusWon = "won"
 			}
-//			chat(ALL_PLAYERS, [statusWon, playerData[playnum].name, playerData[playnum].colour, playerData[playnum].position].join(" "))
-//			debug([statusWon, playerData[playnum].name, playerData[playnum].colour,  playerData[playnum].position].join(" "));
+			console([statusWon, human.colors[playerData[playnum].colour], playerData[playnum].name, _("Team"), human.teams[playerData[playnum].team], _("Position"), playerData[playnum].position].join(" "))
+			debug([statusWon, playerData[playnum].name, playerData[playnum].colour,  playerData[playnum].position].join(" "));
 		}
 		gameOverMessage(true);
 		removeTimer("checkEndConditions");
