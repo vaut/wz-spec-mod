@@ -17,6 +17,46 @@ var maxOilDrums = 0;
 var mainReticule = false;
 var specs = {};
 
+
+//add human readble method
+var human = {
+	scavengers : function () {
+		if ( scavengers= false) {return "scavengers off";}
+		if ( scavengers = true) {return "scavengers on";}
+		},
+
+	alliancesType : function () {
+		switch (alliancesType) {
+			case 0: return "Ally: No Alliances"; break;
+			case 1: return "Ally: Allow Alliances"; break;
+			case 2: return "Ally: Locked. Shared"; break;
+			case 3: return "Ally: Locked. No shared"; break;
+	
+			}
+		},
+
+	powerType : function () {
+		switch (powerType) {
+			case 0: return "Power: Min"; break;
+			case 1: return "Power: Mid"; break;
+			case 2: return "Power: Max"; break;
+			}
+		},
+ 
+	baseType : function () {
+		switch (baseType) {
+			case 0: return "Base: Min"; break;
+			case 1: return "Base: Mid"; break;
+			case 2: return "Base: Max"; break;
+			}
+		}
+	}
+ 
+//playerData[playnum].name
+//playerData[playnum].colour
+
+
+
 const CREATE_LIKE_EVENT = 0;
 const DESTROY_LIKE_EVENT = 1;
 const TRANSFER_LIKE_EVENT = 2;
@@ -289,6 +329,9 @@ function eventGameLoaded()
 function eventGameInit()
 {
 	setupGame();
+	debug([mapName, scavengers, alliancesType, powerType, baseType, version].join());
+
+	debug([mapName, human.scavengers(), human.alliancesType(), human.powerType(), human.baseType(), version].join());
 	
 	// always at least one oil drum, and one more for every 64x64 tiles of map area
 	maxOilDrums = (mapWidth * mapHeight) >> 12; // replace float division with shift for sync-safety
@@ -582,8 +625,8 @@ function checkEndConditions()
 
 	if (gamewon)
 	{
-	debug([mapName, baseType, powerType, scavengers].join());
-	chat(ALL_PLAYERS, [mapName, baseType, powerType, scavengers].join());
+	debug([mapName, scavengers.human, alliancesType.human, powerType.human, baseType.human, version].join());
+//	chat(ALL_PLAYERS, [mapName, baseType, powerType, scavengers].join());
 		//find win and lose players
 		var statusWon = "spec"
 		for (var playnum = 0; playnum < maxPlayers; playnum++)
@@ -610,8 +653,8 @@ function checkEndConditions()
 			{
 				statusWon = "won"
 			}
-			chat(ALL_PLAYERS, [statusWon+" " + playerData[playnum].name, "colour "+ playerData[playnum].colour, "position "+ playerData[playnum].position].join("; "))
-			debug([statusWon+" " + playerData[playnum].name, "colour "+ playerData[playnum].colour, "position "+ playerData[playnum].position].join("; ") );
+//			chat(ALL_PLAYERS, [statusWon, playerData[playnum].name, playerData[playnum].colour, playerData[playnum].position].join(" "))
+//			debug([statusWon, playerData[playnum].name, playerData[playnum].colour,  playerData[playnum].position].join(" "));
 		}
 		gameOverMessage(true);
 		removeTimer("checkEndConditions");
