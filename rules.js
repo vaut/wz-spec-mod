@@ -21,8 +21,8 @@ var specs = {};
 //add human readble method
 var human = {
 	scavengers : function () {
-		if ( scavengers= false) {return _("Scavengers");}
-		if ( scavengers = true) {return _("No Scavengers");}
+		if ( scavengers == true) {return _("Scavengers");}
+		if ( scavengers == false) {return _("No Scavengers");}
 		},
 
 	alliancesType : function () {
