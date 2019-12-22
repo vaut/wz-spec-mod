@@ -27,37 +27,37 @@ var human = {
 
 	alliancesType : function () {
 		switch (alliancesType) {
-			case 0: return _("No Alliances"); break;
-			case 1: return _("Allow Alliances"); break;
-			case 2: return _("Locked Teams"); break;
-			case 3: return _("Locked Teams, No Shared Research"); break;
-	
+			case NO_ALLIANCES: return _("No Alliances");
+			case ALLIANCES: return _("Allow Alliances");
+			case ALLIANCES_TEAMS: return _("Locked Teams");
+			case ALLIANCES_UNSHARED: return _("Locked Teams, No Shared Research");
 			}
 		},
 
 	powerType : function () {
 		switch (powerType) {
-			case 0: return _("Low Power Levels"); break;
-			case 1: return _("Medium Power Levels"); break;
-			case 2: return _("High Power Levels"); break;
+			case 0: return _("Low Power Levels");
+			case 1: return _("Medium Power Levels");
+			case 2: return _("High Power Levels");
 			}
 		},
- 
+
 	baseType : function () {
 		switch (baseType) {
-			case 0: return _("Start with No Bases"); break;
-			case 1: return _("Start with Bases"); break;
-			case 2: return _("Start with Advanced Bases"); break;
+			case CAMP_CLEAN: return _("Start with No Bases");
+			case CAMP_BASE: return _("Start with Bases");
+			case CAMP_WALLS: return _("Start with Advanced Bases");
 			}
 		},
 	colors :  [_("Green"),_("Orange"),_("Grey"),_("Black"),_("Red"),_("Blue"),_("Pink"),_("Cyan"),_("Yellow"),_("Purple"),_("White"),_("Bright blue"),_("Neon green"),_("Infrared"),_("Ultraviolet"),_("Brown")],
 	teams : ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
 	};
 
+
 function writeGameSettings()
 {
-//	debug( [mapName, human.scavengers(), human.alliancesType(), human.powerType(), human.baseType(), version].join("\n");
-	console([mapName, human.scavengers(), human.alliancesType(), human.powerType(), human.baseType()].join("\n"));
+//	debug( [mapName, human.scavengers(), human.alliancesType(), human.powerType(), human.baseType(), "T" + getMultiTechLevel(), version ].join("\n");
+	console([mapName, human.scavengers(), human.alliancesType(), human.powerType(), human.baseType() ].join("\n"));
 }
 
 const CREATE_LIKE_EVENT = 0;
@@ -136,7 +136,6 @@ function reticuleDesignCheck()
 	var structureComplete = false;
 	var HQS = [HQ,];
 
-
 	for (var i = 0, len = HQS.length; i < len; ++i)
 	{
 		var onMapHQ = enumStruct(selectedPlayer, HQS[i]);
@@ -149,7 +148,7 @@ function reticuleDesignCheck()
 			}
 		}
 	}
-	if (structureComplete === true )
+	if (structureComplete === true)
 	{
 		setReticuleButton(4, _("Design (F4)"), "image_design_up.png", "image_design_down.png");
 		setMiniMap(true);
@@ -317,6 +316,7 @@ function setupGame()
 	// Disabled by default
 	setMiniMap(false);
 	setDesign(false);
+
 	setMainReticule();
 	showInterface();
 	mainReticule = true;
@@ -345,9 +345,9 @@ function removeStructs()
 function eventGameInit()
 {
 	setupGame();
-	writeGameSettings()
-	
-	
+	writeGameSettings();
+
+
 	// always at least one oil drum, and one more for every 64x64 tiles of map area
 	maxOilDrums = (mapWidth * mapHeight) >> 12; // replace float division with shift for sync-safety
 	for (var i = 0; i < maxOilDrums; ++i)
@@ -678,7 +678,7 @@ function checkEndConditions()
 				statusWon = "won"
 			}
 			console([statusWon, human.colors[playerData[playnum].colour], playerData[playnum].name, _("Team"), human.teams[playerData[playnum].team], _("Position"), playerData[playnum].position].join(" "))
-			debug([statusWon, playerData[playnum].name, playerData[playnum].colour,  playerData[playnum].position].join(" "));
+//			debug([statusWon, playerData[playnum].name, playerData[playnum].colour,  playerData[playnum].position].join(" "));
 		}
 		gameOverMessage(true);
 		removeTimer("checkEndConditions");
