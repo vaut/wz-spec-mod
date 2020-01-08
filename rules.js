@@ -321,7 +321,6 @@ function setupGame()
 	showInterface();
 	mainReticule = true;
 	hackPlayIngameAudio();
-
 }
 
 function eventGameLoaded()
@@ -554,13 +553,8 @@ function eventGameInit()
 	}
 }
 
-
-
-
-
 // /////////////////////////////////////////////////////////////////
 // END CONDITIONS
-
 function checkEndConditions()
 {
 	// Losing Conditions
@@ -609,7 +603,7 @@ function checkEndConditions()
 					}
 				}
 			}
-			if (gamewon) 
+			if (gamewon)
 			{
 				gameOverMessage(true);
 				removeTimer("checkEndConditions");
