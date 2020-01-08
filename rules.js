@@ -580,8 +580,8 @@ function checkEndConditions()
 	// Winning Conditions
 	if (!specs[selectedPlayer])
 	{
-		var factories = countStruct("A0LightFactory", ENEMIES) + countStruct("A0CyborgFactory", ENEMIES);
-		var droids = countDroid(DROID_ANY, ENEMIES); //scavs droid too
+		var factories = countStruct("A0LightFactory", ENEMIES) + countStruct("A0CyborgFactory", ENEMIES) - countStruct("A0LightFactory", scavengerPlayer) - countStruct("A0CyborgFactory", scavengerPlayer);
+		var droids = countDroid(DROID_ANY, ENEMIES) - countDroid(DROID_ANY, scavengerPlayer);
 		if (droids == 0 && factories == 0)
 			{
 			gameOverMessage(true);
