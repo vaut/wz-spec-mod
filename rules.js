@@ -561,81 +561,48 @@ function eventGameInit()
 // /////////////////////////////////////////////////////////////////
 // END CONDITIONS
 
-
-function losingConditions(playnum)
-{	
-	var factories = countStruct("A0LightFactory", playnum ) + countStruct("A0CyborgFactory", playnum);
-	var droids = countDroid(DROID_ANY, playnum);
-	// Losing Conditions
-	if (droids == 0 && factories == 0)
-	{
-		return true;
-	}
-	return false;
-}
-
 function checkEndConditions()
 {
-
 	// Losing Conditions
-	if (losingConditions(selectedPlayer) && !specs[selectedPlayer] ) 
+	if (!specs[selectedPlayer])
 	{
-		var gameLost = true;
-
-		/* If teams enabled check if all team members have lost  */
-		if (alliancesType == ALLIANCES_TEAMS || alliancesType == ALLIANCES_UNSHARED)
-		{
-			for (var playnum = 0; playnum < maxPlayers; playnum++)
-			{
-				if (playnum != selectedPlayer && allianceExistsBetween(selectedPlayer, playnum))
-				{
-					if (!losingConditions(playnum))
-					{
-						gameLost = false;	// someone from our team still alive
-						break;
-					}
-				}
-			}
-		}
-
-		if (gameLost)
+		var factories = countStruct("A0LightFactory", ALLIES ) + countStruct("A0CyborgFactory", ALLIES);
+		var droids = countDroid(DROID_ANY, ALLIES);
+		if (droids == 0 && factories == 0)
 		{
 			gameOverMessage(false);
 			removeTimer("checkEndConditions");
+			printGameStatus();
 			return;
 		}
 	}
 
 	// Winning Conditions
-	var gamewon = true;
-
-	// check if all enemies defeated
 	if (!specs[selectedPlayer])
-	{	
-		for (var playnum = 0; playnum < maxPlayers; playnum++)
-		{	
-			if (playnum != selectedPlayer && !allianceExistsBetween(selectedPlayer, playnum) && !specs[playnum])	// checking enemy player
+	{
+		var factories = countStruct("A0LightFactory", ENEMIES) + countStruct("A0CyborgFactory", ENEMIES);
+		var droids = countDroid(DROID_ANY, ENEMIES); //scavs droid too
+		if (droids == 0 && factories == 0)
 			{
-				if (!losingConditions(playnum))
-				{
-					gamewon = false;	//one of the enemies still alive
-					break;
-				}
+			gameOverMessage(true);
+			removeTimer("checkEndConditions");
+			printGameStatus();
+			return;
 			}
-		}
 	}
 
-	if (specs[selectedPlayer] === true)
+	if (specs[selectedPlayer])
 	{
 		for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
 		{
-			// check one enemies defeated
 			gamewon = true;
 			for (var playnum = 0; playnum < maxPlayers; playnum++)
 			{
 				if (playnum != splaynum && !allianceExistsBetween(splaynum, playnum) && !specs[playnum])	// checking enemy player
 				{
-					if (!losingConditions(playnum))
+					var factories = countStruct("A0LightFactory", playnum) + countStruct("A0CyborgFactory", playnum);
+					var droids = countDroid(DROID_ANY, playnum);
+					if (droids > 0 || factories > 0)
 					{
 						gamewon = false;	//one of the enemies still alive
 						break;
@@ -644,44 +611,49 @@ function checkEndConditions()
 			}
 			if (gamewon) 
 			{
-				break;
+				gameOverMessage(true);
+				removeTimer("checkEndConditions");
+				printGameStatus();
+				return;
 			}
 		}			
 	}
 
-	if (gamewon)
+	function printGameStatus()
 	{
 		//find win and lose players
-		var statusWon = "spec"
+		var statusWon = "won";
 		for (var playnum = 0; playnum < maxPlayers; playnum++)
 		{
 			if (specs[playnum])
 			{
 				continue;
 			}
-			if (losingConditions(playnum))
+			var factories = countStruct("A0LightFactory", playnum) + countStruct("A0CyborgFactory", playnum);
+			var droids = countDroid(DROID_ANY, playnum);
+			if (droids == 0 && factories == 0)
 			{
 				statusWon = "defeated" ;
+			}
+			if (droids > 0 || factories > 0)
+			{
 				for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
 				{
-					if (playnum != splaynum && allianceExistsBetween(splaynum, playnum) && !specs[playnum])
+					if (playnum != splaynum && !allianceExistsBetween(splaynum, playnum) && !specs[playnum])
 					{
-						if (!losingConditions(splaynum))					{
-							sgamewon = "won";	//one of the enemies still alive
+						var factories = countStruct("A0LightFactory", splaynum) + countStruct("A0CyborgFactory", splaynum);
+						var droids = countDroid(DROID_ANY, splaynum);
+						if (droids > 0 || factories > 0)
+						{
+							statusWon= "play";	//one of the enemies still alive
 							break;
 						}
 					}
 				}
 			}
-			else
-			{
-				statusWon = "won"
-			}
 			console([statusWon, human.colors[playerData[playnum].colour], playerData[playnum].name, _("Team"), human.teams[playerData[playnum].team], _("Position"), playerData[playnum].position].join(" "))
 //			debug([statusWon, playerData[playnum].name, playerData[playnum].colour,  playerData[playnum].position].join(" "));
 		}
-		gameOverMessage(true);
-		removeTimer("checkEndConditions");
 	}
 }
 
