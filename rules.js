@@ -328,19 +328,6 @@ function eventGameLoaded()
 	setupGame();
 }
 
-// fixme hack view oil on map
-// down beacon
-var addingViewOils= [];
-function removeStructs()
-{
-	addingViewOils = enumFeature(ALL_PLAYERS).filter(function(e){if(e.stattype==OIL_RESOURCE)return true;return false;});
-	addingViewOils.forEach(function (oil)
-	{
-		var struct = addStructure("A0ResourceExtractor", scavengerPlayer, oil.x*128, oil.y*128);
-		removeStruct(struct);
-	})
-}
-
 function eventGameInit()
 {
 	setupGame();
@@ -464,7 +451,7 @@ function eventGameInit()
 			droids.forEach(function(e){removeObject(e);});
 			var structs = enumStruct(playnum);
 			structs.forEach(function(e){removeObject(e);});
-			addSpotter(1, 1, playnum, 50000, 0, 0);
+			addSpotter(1, 1, playnum, 32640, 0, 100000000);
 			continue;
 		}
 
@@ -533,17 +520,6 @@ function eventGameInit()
 	{
 		grantTech(TECH_THREE);
 	}
-	// fixme hack add view oil on map
-
-	addingViewOils = enumFeature(ALL_PLAYERS).filter(function(e){if(e.stattype == OIL_RESOURCE || e.stattype == OIL_DRUM)return true;return false;});
-	addingViewOils.forEach(function (oil)
-		{
-		for (var playnum = 0; playnum < maxPlayers; playnum++)
-			{
-			addSpotter(oil.x, oil.y , playnum, 120, 0, 600); //550 mimimum time to add to map all view ojects
-			}
-		});
-	queue("removeStructs", 60000);
 
 	hackNetOn();
 	setTimer("checkEndConditions", 3000);
