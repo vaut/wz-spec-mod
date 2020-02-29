@@ -222,14 +222,14 @@ function checkSpecs()
 	//
 	for (var playnum = 0; playnum < maxPlayers; playnum++)
 	{
-		var specFeature	={}
-		if(enumStruct(playnum,SAT_UPLINK).length != 0)
-		{
-			specFeature["uplink"] = true;
-		}
+		var feature	={}
+//		if(enumStruct(playnum,SAT_UPLINK).length != 0)
+//		{
+//			specFeature["uplink"] = true;
+//		}
 
 		var structs = [FACTORY, CYBORG_FACTORY, VTOL_FACTORY, RESEARCH_LAB, RESOURCE_EXTRACTOR];
-		specFeature["factory"] = true;
+		feature["factory"] = false;
 		for (var i = 0; i < structs.length; ++i)
 		{
 			var onMapStructss = enumStruct(playnum, structs[i]);
@@ -237,53 +237,97 @@ function checkSpecs()
 			{
 				if (onMapStructss[j].status === BUILT)
 				{
-					specFeature["factory"] = false;
+					feature["factory"] = true;
 					break;
 				}
 			}
 		}
 
-		if (enumDroid(playnum, DROID_CONSTRUCT).length > 0)
+		if (countDroid(DROID_ANY, playnum) > 0)
 		{
-			specFeature["track"] = false;
+			feature["droid"] = true;
 		}
 		else
 		{
-		specFeature["track"] = true;
-		}
-		for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
-			{
-				if (playnum != splaynum && allianceExistsBetween(splaynum, playnum) && (enumDroid(splaynum, DROID_CONSTRUCT).length > 0)  )	// checking enemy player
+			feature["droid"] = false;
+			for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
 				{
-					specFeature["track"] = false;
+					if (playnum != splaynum && allianceExistsBetween(splaynum, playnum) &&  countDroid(DROID_ANY, splaynum) > 0  )	// checking enemy player
+					{
+						feature["droid"] = true;
+					}
 				}
-			}
+		}
+		if (countDroid(DROID_ANY, playnum) == countDroid(DROID_CONSTRUCT, playnum))
+		{
+			feature["onlyConsttruct"] = true;
+		}
+		else
+		{
+			feature["onlyConsttruct"] = false;
+			for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
+				{
+					if (playnum != splaynum && allianceExistsBetween(splaynum, playnum) &&  countDroid(DROID_ANY, splaynum) == countDroid(DROID_CONSTRUCT, playnum))	// checking enemy player
+					{
+						feature["onlyConsttruct"] = true;
+					}
+				}
+		}
 
-		specFeature["oil"] = true;
+
+
+		feature["oilReach"] = true;
 		if(enumStruct(playnum,RESOURCE_EXTRACTOR).length != 0) 
 		{
-			specFeature["oil"] = true;
-		}
-		specFeature["oilReach"]=true;
-		var oils = enumFeature(ALL_PLAYERS).filter(function(e){if(e.stattype==OIL_RESOURCE)return true;return false;})
-		var trucks = enumDroid(playnum, DROID_CONSTRUCT);
-		trucks.forEach(function(truck)
+			if (playnum != splaynum && allianceExistsBetween(splaynum, playnum) &&  enumStruct(playnum, RESOURCE_EXTRACTOR).length != 0  )
 			{
-				oils.forEach(function (oil)
+				feature["oilReach"] = true;
+			}
+		}
+		else
+		{
+			feature["oilReach"]=false;
+			var oils = enumFeature(ALL_PLAYERS).filter(function(e){if(e.stattype==OIL_RESOURCE)return true;return false;})
+			for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
+			{
+				oils = oils.concat(enumStruct(splaynum, "A0ResourceExtractor"));
+			}
+			var trucks = enumDroid(playnum, DROID_CONSTRUCT);
+			trucks.forEach(function(truck)
 				{
-					if (droidCanReach(truck, oil.x, oil.y))
+					oils.forEach(function (oil)
 					{
-						specFeature["oilReach"] = false;
-					}
-				})
-			});
-		if (specFeature["track"] && !specFeature["factory"] ) {specs[playnum] = true;}
-		if (specFeature["uplink"] && specFeature["factory"] && specFeature["oil"] && specFeature["oilReach"]) {specs[playnum] = true;}
+						if (droidCanReach(truck, oil.x, oil.y))
+						{
+							feature["oilReach"] = true;
+						}
+						})
+				});
+		}
+debug(JSON.stringify(feature));
+		if (!feature["factory"] && !feature["droid"]) {specs[playnum] = true;}
+		if (!feature["factory"] && !feature["oilReach"] && feature["onlyConsttruct"] ) {specs[playnum] = true;}
 	}
 }
+
+function toSpectator(playnum)
+{		 
+	setPower(0, playnum);
+	var droids = enumDroid(playnum, DROID_ANY);
+	droids.forEach(function(e){removeObject(e);});
+	var structs = enumStruct(playnum);
+	structs.forEach(function(e){removeObject(e);});
+	addSpotter(1, 1, playnum, 32640, 0, 0);
+	setMiniMap(true);
+	setReticuleButton(4, "", "", "");
+	setReticuleButton(5, "", "image_intelmap_up.png", "image_intelmap_down.png");
+	setDesign(false);
+	showInterface();
+	hackPlayIngameAudio();
+}
+
 function setupGame()
-{
-	
+{	
 	checkSpecs();
 	if (tilesetType == "URBAN")
 	{
@@ -302,16 +346,9 @@ function setupGame()
 	{
 		setSky("texpages/page-25-sky-urban.png", 0.5, 10000.0);
 	}
-
 	if (specs[selectedPlayer] === true)
 	{
-		setMiniMap(true);
-		setReticuleButton(4, "", "", "");
-		setReticuleButton(5, "", "image_intelmap_up.png", "image_intelmap_down.png");
-		setDesign(false);
-		showInterface();
-		hackPlayIngameAudio();
-		return;
+		return
 	}
 	// Disabled by default
 	setMiniMap(false);
@@ -446,12 +483,7 @@ function eventGameInit()
 		//Технологии не выдаем.
 		if(specs[playnum] === true)
 		{
-			setPower(0, playnum);
-			var droids = enumDroid(playnum, DROID_ANY);
-			droids.forEach(function(e){removeObject(e);});
-			var structs = enumStruct(playnum);
-			structs.forEach(function(e){removeObject(e);});
-			addSpotter(1, 1, playnum, 32640, 0, 100000000);
+			toSpectator(playnum);
 			continue;
 		}
 
