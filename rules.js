@@ -304,7 +304,7 @@ function checkSpecs()
 						})
 				});
 		}
-debug(JSON.stringify(feature));
+		debug(playerData[playnum].name + JSON.stringify(feature));
 		if (!feature["factory"] && !feature["droid"]) {specs[playnum] = true;}
 		if (!feature["factory"] && !feature["oilReach"] && feature["onlyConsttruct"] ) {specs[playnum] = true;}
 	}
@@ -552,7 +552,7 @@ function eventGameInit()
 	{
 		grantTech(TECH_THREE);
 	}
-
+	setTimer("checkToSpectators", 15000) 
 	hackNetOn();
 	setTimer("checkEndConditions", 3000);
 	if (tilesetType === "URBAN" || tilesetType === "ROCKIES")
@@ -560,7 +560,19 @@ function eventGameInit()
 		setTimer("weatherCycle", 45000);
 	}
 }
+function checkToSpectators ()
+{
+	checkSpecs()
+	for (var playnum = 0; playnum < maxPlayers; playnum++)
+	{
+	if(specs[playnum] === true)
+		{
+			toSpectator(playnum);
+		}
 
+
+	}
+}
 // /////////////////////////////////////////////////////////////////
 // END CONDITIONS
 function checkEndConditions()
