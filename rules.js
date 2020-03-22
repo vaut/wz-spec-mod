@@ -230,19 +230,23 @@ function checkSpecs()
 
 		var structs = [FACTORY, CYBORG_FACTORY, VTOL_FACTORY, RESEARCH_LAB, RESOURCE_EXTRACTOR];
 		feature["factory"] = false;
-		for (var i = 0; i < structs.length; ++i)
-		{
-			var onMapStructss = enumStruct(playnum, structs[i]);
-			for (var j = 0; j < onMapStructss.length; ++j)
+		for (var splaynum = 0; splaynum < maxPlayers; splaynum++)
+		{	
+//			fixme allianceExistsBetween dont correct if leave player
+			if (playerData[playnum].team != playerData[splaynum].team) {continue;} 
+			for (var i = 0; i < structs.length; ++i)
 			{
-				if (onMapStructss[j].status === BUILT)
+				var onMapStructss = enumStruct(splaynum, structs[i]);
+				for (var j = 0; j < onMapStructss.length; ++j)
 				{
-					feature["factory"] = true;
-					break;
+					if (onMapStructss[j].status === BUILT)
+					{
+						feature["factory"] = true;
+						break;
+					}
 				}
 			}
 		}
-
 		if (countDroid(DROID_ANY, playnum) > 0)
 		{
 			feature["droid"] = true;
@@ -304,7 +308,7 @@ function checkSpecs()
 						})
 				});
 		}
-		debug(playerData[playnum].name + JSON.stringify(feature));
+//		debug(playerData[playnum].name + JSON.stringify(feature));
 		if (!feature["factory"] && !feature["droid"]) {specs[playnum] = true;}
 		if (!feature["factory"] && !feature["oilReach"] && feature["onlyConsttruct"] ) {specs[playnum] = true;}
 	}
@@ -318,12 +322,15 @@ function toSpectator(playnum)
 	var structs = enumStruct(playnum);
 	structs.forEach(function(e){removeObject(e);});
 	addSpotter(1, 1, playnum, 32640, 0, 0);
-	setMiniMap(true);
-	setReticuleButton(4, "", "", "");
-	setReticuleButton(5, "", "image_intelmap_up.png", "image_intelmap_down.png");
-	setDesign(false);
-	showInterface();
-	hackPlayIngameAudio();
+	if (selectedPlayer ==  playnum)
+	{
+		setMiniMap(true);
+		setReticuleButton(4, "", "", "");
+		setReticuleButton(5, "", "image_intelmap_up.png", "image_intelmap_down.png");
+		setDesign(false);
+		showInterface();
+		hackPlayIngameAudio();
+	}
 }
 
 function setupGame()
